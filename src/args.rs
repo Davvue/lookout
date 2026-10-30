@@ -6,13 +6,17 @@ pub struct Args {
     #[command(subcommand)]
     command: Command,
 
-    #[arg(long, global = true, help = "Path to the config directory", default_value = "$HOME/.config/lookup/")]
+    #[arg(long, global = true, help = "Path to the config directory", default_value = "~/.config/lookout/")]
     config_directory: String,
 }
 
 impl Args {
     pub fn command(&self) -> &Command {
         &self.command
+    }
+
+    pub fn config_directory(&self) -> &str {
+        &self.config_directory
     }
 }
 

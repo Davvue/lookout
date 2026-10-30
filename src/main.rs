@@ -1,18 +1,22 @@
 mod args;
+mod config;
 mod subcommands;
 
 use clap::Parser;
-use args::{Args, Command};
-use subcommands::{
+use crate::args::{Args, Command};
+use crate::subcommands::{
     add::execute as execute_add,
     list::execute as execute_list,
     remove::execute as execute_remove,
     run::execute as execute_run
 };
+use crate::config::*;
 
 fn main() {
     let args = Args::parse();
     println!("{:?}", args);
+
+    load_config(args.config_directory());
 
     let _execution_result = match args.command() {
         Command::Add { .. } => execute_add(),
