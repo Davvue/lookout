@@ -10,6 +10,12 @@ pub struct Args {
     config_directory: String,
 }
 
+impl Args {
+    pub fn command(&self) -> &Command {
+        &self.command
+    }
+}
+
 #[derive(Subcommand, Debug, Clone)]
 pub enum Command {
     Run {
@@ -44,7 +50,6 @@ pub enum Command {
         force: bool
     },
     List,
-    Config {},
     Add {
         #[arg(
             help = "URL of the service to check",
