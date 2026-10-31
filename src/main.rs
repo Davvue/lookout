@@ -14,11 +14,11 @@ fn main() {
     let args = Args::parse();
     println!("{:?}", args);
 
-    load_config(args.config_directory());
+    let _ = load_config(args.config_directory());
 
     let _execution_result = match args.command() {
         Command::Add { .. } => execute_add(),
-        Command::List { .. } => execute_list(),
+        Command::List => execute_list(),
         Command::Remove { .. } => execute_remove(),
         Command::Run { .. } => execute_run(),
     };

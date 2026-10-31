@@ -23,8 +23,8 @@ pub fn load_config(path_str: &str) -> Result<Config, std::io::Error> {
 }
 
 fn ensure_directory_structure(path: &Path) -> Result<bool, std::io::Error> {
-    if !fs::exists(&path)? {
-        fs::create_dir_all(&path)?;
+    if !fs::exists(path)? {
+        fs::create_dir_all(path)?;
     }
 
     let config_path = path.join("config.json");
@@ -37,7 +37,9 @@ fn ensure_directory_structure(path: &Path) -> Result<bool, std::io::Error> {
             timeout_ms: 1000 * 5,
             interval_ms: 1000 * 60 * 10,
         })?;
-        f.write(&json.into_bytes())?;
+
+        let written = f.write(json.as_bytes())?;
+        if written != json.len() {}
     }
 
     if !fs::exists(&services_path)? {
