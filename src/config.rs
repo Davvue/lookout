@@ -1,9 +1,9 @@
+use expanduser::expanduser;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
-use std::path::Path;
 use std::io::Write;
-use expanduser::expanduser;
-use serde::{Serialize, Deserialize};
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
@@ -18,7 +18,7 @@ pub fn load_config(path_str: &str) -> Result<Config, std::io::Error> {
 
     Ok(Config {
         timeout_ms: 1000,
-       interval_ms: 1000,
+        interval_ms: 1000,
     })
 }
 
@@ -35,7 +35,7 @@ fn ensure_directory_structure(path: &Path) -> Result<bool, std::io::Error> {
         let mut f = File::create(&config_path)?;
         let json = serde_json::to_string(&Config {
             timeout_ms: 1000 * 5,
-            interval_ms: 1000 * 60 * 10
+            interval_ms: 1000 * 60 * 10,
         })?;
         f.write(&json.into_bytes())?;
     }

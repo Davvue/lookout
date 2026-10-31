@@ -2,15 +2,13 @@ mod args;
 mod config;
 mod subcommands;
 
-use clap::Parser;
 use crate::args::{Args, Command};
-use crate::subcommands::{
-    add::execute as execute_add,
-    list::execute as execute_list,
-    remove::execute as execute_remove,
-    run::execute as execute_run
-};
 use crate::config::*;
+use crate::subcommands::{
+    add::execute as execute_add, list::execute as execute_list, remove::execute as execute_remove,
+    run::execute as execute_run,
+};
+use clap::Parser;
 
 fn main() {
     let args = Args::parse();

@@ -6,7 +6,12 @@ pub struct Args {
     #[command(subcommand)]
     command: Command,
 
-    #[arg(long, global = true, help = "Path to the config directory", default_value = "~/.config/lookout/")]
+    #[arg(
+        long,
+        global = true,
+        help = "Path to the config directory",
+        default_value = "~/.config/lookout/"
+    )]
     config_directory: String,
 }
 
@@ -37,12 +42,7 @@ pub enum Command {
         )]
         out_file: Option<String>,
 
-        #[arg(
-            short,
-            long,
-            help = "Print result to stdout",
-            long_help
-        )]
+        #[arg(short, long, help = "Print result to stdout", long_help)]
         print: bool,
 
         #[arg(
@@ -51,26 +51,17 @@ pub enum Command {
             help = "Force execution of all services and ignore the specified interval_ms",
             long_help
         )]
-        force: bool
+        force: bool,
     },
     List,
     Add {
-        #[arg(
-            help = "URL of the service to check",
-            long_help
-        )]
+        #[arg(help = "URL of the service to check", long_help)]
         url: String,
 
-        #[arg(
-            help = "ID for the service",
-            long_help
-        )]
+        #[arg(help = "ID for the service", long_help)]
         id: String,
 
-        #[arg(
-            help = "Custom display name of the service",
-            long_help
-        )]
+        #[arg(help = "Custom display name of the service", long_help)]
         name: Option<String>,
 
         #[arg(
@@ -89,7 +80,7 @@ pub enum Command {
                 Does not guarantee execution after the interval has passed, but prevents repeated execution before the specified time has passed.",
             long_help
         )]
-        interval_ms: Option<u32>
+        interval_ms: Option<u32>,
     },
     Remove {
         #[arg(help = "ID of the service to remove from checks", long_help)]
