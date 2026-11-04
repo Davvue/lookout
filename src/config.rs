@@ -1,9 +1,29 @@
 use expanduser::expanduser;
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::fs::File;
-use std::io::Write;
+use std::io;
 use std::path::Path;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Service {
+    id: String,
+    name: String,
+    url: String,
+    timeout_ms: Option<u32>,
+    interval_ms: Option<u32>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RunResult {
+    id: String,
+    failed_attempts: u8,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct OutputList {
+    last_run_ms: Option<u64>,
+    outputs: Vec<RunResult>,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
@@ -11,7 +31,16 @@ pub struct Config {
     interval_ms: u32,
 }
 
-pub fn load_config(path_str: &str) -> Result<Config, std::io::Error> {
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            timeout_ms: 1000 * 5,
+            interval_ms: 1000 * 60 * 10,
+        }
+    }
+}
+
+pub fn load_config(path_str: &str) -> io::Result<Config> {
     let path = expanduser(path_str)?;
 
     ensure_directory_structure(&path)?;
@@ -22,33 +51,24 @@ pub fn load_config(path_str: &str) -> Result<Config, std::io::Error> {
     })
 }
 
-fn ensure_directory_structure(path: &Path) -> Result<bool, std::io::Error> {
+fn ensure_directory_structure(path: &Path) -> io::Result<()> {
+    fs::create_dir_all(path)?;
+
+    let config_json = serde_json::to_string(&Config::default())?;
+    let services_json = serde_json::to_string::<[Service]>(&[])?;
+    let output_json = serde_json::to_string(&OutputList::default())?;
+
+    write_if_missing(&path.join("config.json"), &config_json)?;
+    write_if_missing(&path.join("services.json"), &services_json)?;
+    write_if_missing(&path.join("output.json"), &output_json)?;
+
+    Ok(())
+}
+
+/// Writes `contents` to `path` only if the file doesn't already exist.
+fn write_if_missing(path: &Path, contents: &str) -> io::Result<()> {
     if !fs::exists(path)? {
-        fs::create_dir_all(path)?;
+        fs::write(path, contents)?;
     }
-
-    let config_path = path.join("config.json");
-    let services_path = path.join("services.json");
-    let outfile_path = path.join("output.json");
-
-    if !fs::exists(&config_path)? {
-        let mut f = File::create(&config_path)?;
-        let json = serde_json::to_string(&Config {
-            timeout_ms: 1000 * 5,
-            interval_ms: 1000 * 60 * 10,
-        })?;
-
-        let written = f.write(json.as_bytes())?;
-        if written != json.len() {}
-    }
-
-    if !fs::exists(&services_path)? {
-        File::create(&services_path)?;
-    }
-
-    if !fs::exists(&outfile_path)? {
-        File::create(&outfile_path)?;
-    }
-
-    Ok(true)
+    Ok(())
 }
