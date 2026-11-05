@@ -1,5 +1,6 @@
 use expanduser::expanduser;
 use serde::{Deserialize, Serialize};
+use serde_json;
 use std::fs;
 use std::io;
 use std::path::Path;
@@ -45,10 +46,10 @@ pub fn load_config(path_str: &str) -> io::Result<Config> {
 
     ensure_directory_structure(&path)?;
 
-    Ok(Config {
-        timeout_ms: 1000,
-        interval_ms: 1000,
-    })
+    let config_file = fs::File::open(&path.join("config.json"))?;
+    let config: Config = serde_json::from_reader(config_file)?;
+
+    Ok(config)
 }
 
 fn ensure_directory_structure(path: &Path) -> io::Result<()> {

@@ -2,6 +2,7 @@ mod args;
 mod config;
 mod subcommands;
 
+use std::process::{ExitCode};
 use crate::args::{Args, Command};
 use crate::config::*;
 use crate::subcommands::{
@@ -10,16 +11,24 @@ use crate::subcommands::{
 };
 use clap::Parser;
 
-fn main() {
+fn main() -> ExitCode {
     let args = Args::parse();
     println!("{:?}", args);
 
-    let _ = load_config(args.config_directory());
+    let config = match load_config(args.config_directory()) {
+        Ok(config) => config,
+        Err(err) => {
+            eprintln!("Failed loading config: {}", err);
+            return ExitCode::FAILURE;
+        }
+    };
 
     let _execution_result = match args.command() {
         Command::Add { .. } => execute_add(),
         Command::List => execute_list(),
         Command::Remove { .. } => execute_remove(),
-        Command::Run { .. } => execute_run(),
+        Command::Run { .. } => execute_run(&config),
     };
+
+    ExitCode::SUCCESS
 }
