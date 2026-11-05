@@ -1,6 +1,7 @@
 mod args;
 mod config;
 mod subcommands;
+mod request_service;
 
 use std::process::{ExitCode};
 use crate::args::{Args, Command};
