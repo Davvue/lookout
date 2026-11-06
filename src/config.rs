@@ -14,6 +14,14 @@ pub struct Service {
     interval_ms: Option<u32>,
 }
 
+impl Service {
+    pub fn id(&self) -> &str { &self.id }
+
+    pub fn name(&self) -> &str { &self.name }
+
+    pub fn url(&self) -> &str { &self.url }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RunResult {
     id: String,
@@ -50,18 +58,18 @@ pub fn load_config(path_str: &str) -> io::Result<Config> {
 
     ensure_directory_structure(&path)?;
 
-    let config_file = fs::File::open(&path.join("config.json"))?;
+    let config_file = fs::File::open(&path.join(CONFIG_FILE))?;
     let config: Config = serde_json::from_reader(config_file)?;
 
     Ok(config)
 }
 
 pub fn load_services(path_str: &str) -> io::Result<Vec<Service>> {
-    let path = Path::new(path_str);
+    let path = expanduser(path_str)?;
 
     ensure_directory_structure(&path)?;
 
-    let service_file = fs::File::open(path.join("service.json"))?;
+    let service_file = fs::File::open(&path.join(SERVICE_FILE))?;
     let services: Vec<Service> = serde_json::from_reader(service_file)?;
 
     Ok(services)

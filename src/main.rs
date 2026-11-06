@@ -24,7 +24,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let _services = match load_services(args.config_directory()) {
+    let services = match load_services(args.config_directory()) {
         Ok(services) => services,
         Err(err) => {
             eprintln!("Failed loading services: {}", err);
@@ -34,7 +34,7 @@ fn main() -> ExitCode {
 
     let _execution_result = match args.command() {
         Command::Add { .. } => execute_add(),
-        Command::List => execute_list(),
+        Command::List => Ok(execute_list(services)),
         Command::Remove { .. } => execute_remove(),
         Command::Run { id, out_file, print, force } => execute_run(&config, id, out_file, print, force),
     };
