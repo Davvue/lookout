@@ -41,6 +41,10 @@ impl Default for Config {
     }
 }
 
+const CONFIG_FILE: &str = "config.json";
+const SERVICE_FILE: &str = "services.json";
+const OUTPUT_FILE: &str = "output.json";
+
 pub fn load_config(path_str: &str) -> io::Result<Config> {
     let path = expanduser(path_str)?;
 
@@ -52,6 +56,17 @@ pub fn load_config(path_str: &str) -> io::Result<Config> {
     Ok(config)
 }
 
+pub fn load_services(path_str: &str) -> io::Result<Vec<Service>> {
+    let path = Path::new(path_str);
+
+    ensure_directory_structure(&path)?;
+
+    let service_file = fs::File::open(path.join("service.json"))?;
+    let services: Vec<Service> = serde_json::from_reader(service_file)?;
+
+    Ok(services)
+}
+
 fn ensure_directory_structure(path: &Path) -> io::Result<()> {
     fs::create_dir_all(path)?;
 
@@ -59,9 +74,9 @@ fn ensure_directory_structure(path: &Path) -> io::Result<()> {
     let services_json = serde_json::to_string::<[Service]>(&[])?;
     let output_json = serde_json::to_string(&OutputList::default())?;
 
-    write_if_missing(&path.join("config.json"), &config_json)?;
-    write_if_missing(&path.join("services.json"), &services_json)?;
-    write_if_missing(&path.join("output.json"), &output_json)?;
+    write_if_missing(&path.join(CONFIG_FILE), &config_json)?;
+    write_if_missing(&path.join(SERVICE_FILE), &services_json)?;
+    write_if_missing(&path.join(OUTPUT_FILE), &output_json)?;
 
     Ok(())
 }

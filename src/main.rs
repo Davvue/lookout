@@ -24,6 +24,14 @@ fn main() -> ExitCode {
         }
     };
 
+    let _services = match load_services(args.config_directory()) {
+        Ok(services) => services,
+        Err(err) => {
+            eprintln!("Failed loading services: {}", err);
+            return ExitCode::FAILURE;
+        }
+    };
+
     let _execution_result = match args.command() {
         Command::Add { .. } => execute_add(),
         Command::List => execute_list(),
