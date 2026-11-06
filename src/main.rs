@@ -28,7 +28,7 @@ fn main() -> ExitCode {
         Command::Add { .. } => execute_add(),
         Command::List => execute_list(),
         Command::Remove { .. } => execute_remove(),
-        Command::Run { .. } => execute_run(&config),
+        Command::Run { id, out_file, print, force } => execute_run(&config, id, out_file, print, force),
     };
 
     ExitCode::SUCCESS
