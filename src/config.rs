@@ -16,10 +16,10 @@ pub struct Service {
 
 impl Service {
     pub fn id(&self) -> &str { &self.id }
-
     pub fn name(&self) -> &str { &self.name }
-
     pub fn url(&self) -> &str { &self.url }
+    pub fn timeout_ms(&self) -> Option<u32> { self.timeout_ms }
+    pub fn interval_ms(&self) -> Option<u32> { self.interval_ms }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -38,6 +38,11 @@ pub struct OutputList {
 pub struct Config {
     timeout_ms: u32,
     interval_ms: u32,
+}
+
+impl Config {
+    pub fn timeout_ms(&self) -> u32 { self.timeout_ms }
+    pub fn interval_ms(&self) -> u32 { self.interval_ms }
 }
 
 impl Default for Config {

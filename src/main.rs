@@ -36,7 +36,7 @@ fn main() -> ExitCode {
         Command::Add { .. } => execute_add(),
         Command::List => Ok(execute_list(services)),
         Command::Remove { .. } => execute_remove(),
-        Command::Run { id, out_file, print, force } => execute_run(&config, id, out_file, print, force),
+        Command::Run { id, out_file, print, force } => execute_run(&config, &services, id, out_file, print, force),
     };
 
     ExitCode::SUCCESS
