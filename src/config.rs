@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs;
 use std::io;
-use std::io::Write;
 use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -37,7 +36,10 @@ impl RunResult {
     pub fn id(&self) -> &str { &self.id }
     pub fn failed_attempts(&self) -> u8 { self.failed_attempts }
     pub fn increment_attempts(&mut self) {
-        self.failed_attempts += 1;
+        self.failed_attempts = self.failed_attempts.saturating_add(1);
+    }
+    pub fn reset_attempts(&mut self) {
+        self.failed_attempts = 0;
     }
 }
 
@@ -56,14 +58,17 @@ impl OutputList {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(default)]
 pub struct Config {
     timeout_ms: u32,
     interval_ms: u32,
+    down_threshold: u8,
 }
 
 impl Config {
     pub fn timeout_ms(&self) -> u32 { self.timeout_ms }
     pub fn interval_ms(&self) -> u32 { self.interval_ms }
+    pub fn down_threshold(&self) -> u8 { self.down_threshold }
 }
 
 impl Default for Config {
@@ -71,6 +76,7 @@ impl Default for Config {
         Config {
             timeout_ms: 1000 * 5,
             interval_ms: 1000 * 60 * 10,
+            down_threshold: 3,
         }
     }
 }

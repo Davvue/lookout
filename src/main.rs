@@ -44,7 +44,7 @@ fn main() -> ExitCode {
         Command::Add { .. } => execute_add(),
         Command::List => Ok(execute_list(services)),
         Command::Remove { .. } => execute_remove(),
-        Command::Run { id, print, force } => execute_run(&config, &services, &previous_out, args.config_directory(), id, print, force),
+        Command::Run { id, print, force } => execute_run(&config, &services, &previous_out, args.config_directory(), id.as_deref(), *print, *force),
     };
 
     ExitCode::SUCCESS
