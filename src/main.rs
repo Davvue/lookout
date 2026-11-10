@@ -14,7 +14,6 @@ use clap::Parser;
 
 fn main() -> ExitCode {
     let args = Args::parse();
-    println!("{:?}", args);
 
     let config = match load_config(args.config_directory()) {
         Ok(config) => config,
@@ -40,11 +39,19 @@ fn main() -> ExitCode {
         }
     };
 
-    let _execution_result = match args.command() {
+    let execution_result = match args.command() {
         Command::Add { .. } => execute_add(),
         Command::List => Ok(execute_list(services)),
         Command::Remove { .. } => execute_remove(),
         Command::Run { id, print, force } => execute_run(&config, &services, &previous_out, args.config_directory(), id.as_deref(), *print, *force),
+    };
+
+    match execution_result {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(err) => {
+            eprintln!("Failed execution: {}", err);
+            return ExitCode::FAILURE;
+        }
     };
 
     ExitCode::SUCCESS
