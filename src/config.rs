@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fs;
 use std::io;
+use std::io::Write;
 use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -22,16 +23,36 @@ impl Service {
     pub fn interval_ms(&self) -> Option<u32> { self.interval_ms }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RunResult {
     id: String,
     failed_attempts: u8,
+}
+
+impl RunResult {
+    pub fn new(id: String, failed_attempts: u8) -> Self {
+        Self { id, failed_attempts }
+    }
+    
+    pub fn id(&self) -> &str { &self.id }
+    pub fn failed_attempts(&self) -> u8 { self.failed_attempts }
+    pub fn increment_attempts(&mut self) {
+        self.failed_attempts += 1;
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct OutputList {
     last_run_ms: Option<u64>,
     outputs: Vec<RunResult>,
+}
+
+impl OutputList {
+    pub fn new(last_run_ms: u64, outputs: Vec<RunResult>) -> Self {
+        OutputList { last_run_ms: Some(last_run_ms), outputs: outputs }
+    }
+    pub fn last_run_ms(&self) -> Option<u64> { self.last_run_ms }
+    pub fn outputs(&self) -> &Vec<RunResult> { &self.outputs }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -80,6 +101,17 @@ pub fn load_services(path_str: &str) -> io::Result<Vec<Service>> {
     Ok(services)
 }
 
+pub fn load_output(path_str: &str) -> io::Result<OutputList> {
+    let path = expanduser(path_str)?;
+    
+    ensure_directory_structure(&path)?;
+    
+    let output_file = fs::File::open(&path.join(OUTPUT_FILE))?;
+    let output_list: OutputList = serde_json::from_reader(output_file)?;
+    
+    Ok(output_list)
+}
+
 fn ensure_directory_structure(path: &Path) -> io::Result<()> {
     fs::create_dir_all(path)?;
 
@@ -99,5 +131,15 @@ fn write_if_missing(path: &Path, contents: &str) -> io::Result<()> {
     if !fs::exists(path)? {
         fs::write(path, contents)?;
     }
+    Ok(())
+}
+
+pub fn write_out_file(path_str: &str, contents: &OutputList) -> io::Result<()> {
+    let path = expanduser(path_str)?;
+
+    ensure_directory_structure(&path)?;
+
+    let file = fs::File::create(path.join(OUTPUT_FILE))?;
+    serde_json::to_writer(file, contents)?;
     Ok(())
 }

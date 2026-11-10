@@ -34,14 +34,6 @@ pub enum Command {
         )]
         id: Option<String>,
 
-        #[arg(
-            short,
-            long,
-            help = "Writes the result to the output file instead of the default output file",
-            long_help
-        )]
-        out_file: Option<String>,
-
         #[arg(short, long, help = "Print result to stdout", long_help)]
         print: bool,
 

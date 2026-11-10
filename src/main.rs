@@ -32,11 +32,19 @@ fn main() -> ExitCode {
         }
     };
 
+    let previous_out = match load_output(args.config_directory()) {
+        Ok(out) => out,
+        Err(err) => {
+            eprintln!("Failed loading previous output: {}", err);
+            return ExitCode::FAILURE;
+        }
+    };
+
     let _execution_result = match args.command() {
         Command::Add { .. } => execute_add(),
         Command::List => Ok(execute_list(services)),
         Command::Remove { .. } => execute_remove(),
-        Command::Run { id, out_file, print, force } => execute_run(&config, &services, id, out_file, print, force),
+        Command::Run { id, print, force } => execute_run(&config, &services, &previous_out, args.config_directory(), id, print, force),
     };
 
     ExitCode::SUCCESS
