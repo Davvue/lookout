@@ -1,9 +1,12 @@
 use crate::config::Service;
+use crate::store::Store;
 
-pub fn execute(services: Vec<Service>) {
+pub fn execute(store: &dyn Store) -> Result<(), String> {
+    let services = store.services().map_err(|err| format!("Failed to load services: {}", err))?;
+
     if services.is_empty() {
         println!("No services configured. Use `add` to add one.");
-        return;
+        return Ok(());
     }
 
     let headers = ("NAME", "ID", "URL");
@@ -28,4 +31,5 @@ pub fn execute(services: Vec<Service>) {
             service.url()
         );
     }
+    Ok(())
 }

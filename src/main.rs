@@ -12,7 +12,6 @@ use crate::subcommands::{
 };
 use clap::Parser;
 use crate::store::file::FileStore;
-use crate::store::Store;
 
 fn main() -> ExitCode {
     let args = Args::parse();
@@ -25,33 +24,17 @@ fn main() -> ExitCode {
         }
     };
 
-    let config = match store.config() {
-        Ok(config) => config,
-        Err(err) => {
-            eprintln!("Failed loading config: {}", err);
-            return ExitCode::FAILURE;
-        }
-    };
-
-    let services = match store.services() {
-        Ok(services) => services,
-        Err(err) => {
-            eprintln!("Failed loading services: {}", err);
-            return ExitCode::FAILURE;
-        }
-    };
-
     let execution_result = match args.command() {
         Command::Add { .. } => execute_add(),
-        Command::List => Ok(execute_list(services)),
+        Command::List => execute_list(&store),
         Command::Remove { .. } => execute_remove(),
-        Command::Run { id, print, force } => execute_run(&store, &config, &services, id.as_deref(), *print, *force),
+        Command::Run { id, print, force } => execute_run(&store, id.as_deref(), *print, *force),
     };
 
     match execution_result {
         Ok(()) => ExitCode::SUCCESS,
         Err(err) => {
-            eprintln!("Failed execution: {}", err);
+            eprintln!("Error:\n\t{}", err);
             ExitCode::FAILURE
         }
     }

@@ -1,15 +1,18 @@
-use crate::config::{Config, OutputList, RunResult, Service};
+use crate::config::{OutputList, RunResult};
 use crate::request_service::http_request;
 use crate::store::Store;
 
-pub fn execute(store: &dyn Store, config: &Config, services: &[Service], id: Option<&str>, print: bool, force: bool) -> Result<(), String> {
-    let candidate_services: &[Service] = match id {
+pub fn execute(store: &dyn Store, id: Option<&str>, print: bool, force: bool) -> Result<(), String> {
+    let config = store.config().map_err(|err| format!("Failed to load config: {}", err))?;
+    let services = store.services().map_err(|err| format!("Failed to load services: {}", err))?;
+
+    let candidate_services = match id {
         Some(id) => services
             .iter()
             .find(|s| s.id() == id)
             .map(std::slice::from_ref)
             .ok_or_else(|| format!("No service with id '{}' found", id))?,
-        None => services,
+        None => services.as_slice(),
     };
 
     let previous_output = store.output()
