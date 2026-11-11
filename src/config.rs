@@ -30,11 +30,39 @@ impl RunResult {
     
     pub fn id(&self) -> &str { &self.id }
     pub fn failed_attempts(&self) -> u8 { self.failed_attempts }
-    pub fn increment_attempts(&mut self) {
-        self.failed_attempts = self.failed_attempts.saturating_add(1);
+
+    pub fn record(&mut self, success: bool) {
+        if success {
+            self.failed_attempts = 0;
+        } else {
+            self.failed_attempts = self.failed_attempts.saturating_add(1);
+        }
     }
-    pub fn reset_attempts(&mut self) {
-        self.failed_attempts = 0;
+
+    pub fn status(&self, down_threshold: u8) -> Status {
+        match self.failed_attempts {
+            0 => Status::Up,
+            n if n >= down_threshold => Status::Down { attempts: n },
+            n => Status::Failing { attempts: n, threshold: down_threshold },
+        }
+    }
+}
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Status {
+    Up,
+    Failing { attempts: u8, threshold: u8 },
+    Down { attempts: u8 },
+}
+
+impl std::fmt::Display for Status {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Status::Up => write!(f, "Up"),
+            Status::Failing { attempts, threshold } => write!(f, "Failing ({attempts}/{threshold})"),
+            Status::Down { attempts } => write!(f, "Down ({attempts} failed checks)"),
+        }
     }
 }
 

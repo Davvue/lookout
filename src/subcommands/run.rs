@@ -32,24 +32,17 @@ pub fn execute(store: &dyn Store, id: Option<&str>, print: bool, force: bool) ->
                 run_results.len() - 1
             }
         };
-        let from_previous = &mut run_results[index];
+        let result = &mut run_results[index];
 
         let res = http_request(service.url(), service.timeout_ms().unwrap_or(config.timeout_ms()));
-
-        let is_up = matches!(res, Ok(true));
-        if is_up {
-            from_previous.reset_attempts();
-        } else {
-            from_previous.increment_attempts();
-        }
+        result.record(matches!(res, Ok(true)));
 
         if print {
-            let printable_status = match &res {
-                Ok(false) if from_previous.failed_attempts() >= config.down_threshold()  => { "Down" },
-                Ok(_) => { "Up" }
-                Err(e) => &e.to_string(),
-            };
-            println!("{}: {}", service.name(), printable_status);
+            let status = result.status(config.down_threshold());
+            match &res {
+                Err(err) => println!("{}: {} - {}", service.name(), status, err),
+                Ok(_) => println!("{}: {}", service.name(), status),
+            }
         }
     }
 
