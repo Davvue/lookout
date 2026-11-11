@@ -1,8 +1,8 @@
-use crate::Config;
-use crate::config::{write_out_file, OutputList, RunResult, Service};
+use crate::config::{Config, OutputList, RunResult, Service};
 use crate::request_service::http_request;
+use crate::store::Store;
 
-pub fn execute(config: &Config, services: &[Service], previous_output: &OutputList, config_dir: &str, id: Option<&str>, print: bool, force: bool) -> Result<(), String> {
+pub fn execute(store: &dyn Store, config: &Config, services: &[Service], id: Option<&str>, print: bool, force: bool) -> Result<(), String> {
     let candidate_services: &[Service] = match id {
         Some(id) => services
             .iter()
@@ -11,6 +11,9 @@ pub fn execute(config: &Config, services: &[Service], previous_output: &OutputLi
             .ok_or_else(|| format!("No service with id '{}' found", id))?,
         None => services,
     };
+
+    let previous_output = store.output()
+        .map_err(|err| format!("Failed loading previous output: {}", err))?;
 
     let mut run_results: Vec<RunResult> = previous_output.outputs()
         .iter()
@@ -47,7 +50,8 @@ pub fn execute(config: &Config, services: &[Service], previous_output: &OutputLi
         }
     }
 
-    write_out_file(config_dir, &OutputList::new(0, run_results)).map_err(|err| format!("Failed writing output file: {}", err))?;
+    store.save_output(&OutputList::new(0, run_results))
+        .map_err(|err| format!("Failed writing output: {}", err))?;
 
     Ok(())
 }
