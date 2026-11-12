@@ -1,7 +1,7 @@
 pub mod file;
 
-use std::io::Error;
 use crate::config::{Config, OutputList, Service};
+use std::io::Error;
 
 pub trait Store {
     fn config(&self) -> Result<Config, StoreError>;
@@ -14,7 +14,7 @@ pub trait Store {
 #[derive(Debug)]
 pub enum StoreError {
     Io(std::io::Error),
-    Data(Box<dyn std::error::Error + Send + Sync>)
+    Data(Box<dyn std::error::Error + Send + Sync>),
 }
 
 impl std::fmt::Display for StoreError {
@@ -28,7 +28,9 @@ impl std::fmt::Display for StoreError {
 impl std::error::Error for StoreError {}
 
 impl From<std::io::Error> for StoreError {
-    fn from(value: Error) -> Self { StoreError::Io(value) }
+    fn from(value: Error) -> Self {
+        StoreError::Io(value)
+    }
 }
 
 impl From<serde_json::Error> for StoreError {

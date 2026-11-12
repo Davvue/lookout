@@ -1,10 +1,10 @@
-use std::{fs, io};
-use std::io::Write;
-use std::path::{PathBuf};
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 use crate::config::{Config, OutputList, Service};
 use crate::store::{Store, StoreError};
+use serde::Serialize;
+use serde::de::DeserializeOwned;
+use std::io::Write;
+use std::path::PathBuf;
+use std::{fs, io};
 
 const CONFIG_FILE: &str = "config.json";
 const SERVICE_FILE: &str = "services.json";
@@ -16,7 +16,9 @@ pub struct FileStore {
 
 impl FileStore {
     pub fn open(dir: &str) -> Result<Self, StoreError> {
-        let store = Self { dir: expanduser::expanduser(dir)? };
+        let store = Self {
+            dir: expanduser::expanduser(dir)?,
+        };
         store.ensure_structure()?;
         Ok(store)
     }
@@ -49,22 +51,32 @@ impl FileStore {
 
     fn write_json<T: Serialize + ?Sized>(&self, name: &str, data: &T) -> Result<(), StoreError> {
         let tmp = self.dir.join(format!("{name}.tmp"));
-        
+
         let mut writer = io::BufWriter::new(fs::File::create(&tmp)?);
         serde_json::to_writer(&mut writer, data)?;
         writer.flush()?;
-        
+
         fs::rename(tmp, self.dir.join(name))?;
         Ok(())
     }
 }
 
 impl Store for FileStore {
-    fn config(&self) -> Result<Config, StoreError> { self.read_json(CONFIG_FILE) }
-    fn services(&self) -> Result<Vec<Service>, StoreError> { self.read_json(SERVICE_FILE) }
-    fn output(&self) -> Result<OutputList, StoreError> { self.read_json(OUTPUT_FILE) }
+    fn config(&self) -> Result<Config, StoreError> {
+        self.read_json(CONFIG_FILE)
+    }
+    fn services(&self) -> Result<Vec<Service>, StoreError> {
+        self.read_json(SERVICE_FILE)
+    }
+    fn output(&self) -> Result<OutputList, StoreError> {
+        self.read_json(OUTPUT_FILE)
+    }
 
-    fn save_output(&self, output: &OutputList) -> Result<(), StoreError> { self.write_json(OUTPUT_FILE, output) }
+    fn save_output(&self, output: &OutputList) -> Result<(), StoreError> {
+        self.write_json(OUTPUT_FILE, output)
+    }
 
-    fn save_services(&self, services: &[Service]) -> Result<(), StoreError> { self.write_json(SERVICE_FILE, services) }
+    fn save_services(&self, services: &[Service]) -> Result<(), StoreError> {
+        self.write_json(SERVICE_FILE, services)
+    }
 }

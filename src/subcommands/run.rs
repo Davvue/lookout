@@ -53,13 +53,17 @@ pub fn execute(
         let remaining = remaining_ms(
             now_ms,
             result.last_check_ms().unwrap_or(0),
-            service.interval_ms().unwrap_or(config.interval_ms())
+            service.interval_ms().unwrap_or(config.interval_ms()),
         );
 
-        if !force
-            && remaining > 0
-        {
-            if print { println!("{}: skipped (next check due in {})", service.name(), format_duration(remaining)); }
+        if !force && remaining > 0 {
+            if print {
+                println!(
+                    "{}: skipped (next check due in {})",
+                    service.name(),
+                    format_duration(remaining)
+                );
+            }
             continue;
         }
 

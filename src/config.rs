@@ -10,14 +10,36 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn new(id: String, url: String, name: String, timeout_ms: Option<u32>, interval_ms: Option<u32>) -> Self {
-        Service { id, url, name, timeout_ms, interval_ms }
+    pub fn new(
+        id: String,
+        url: String,
+        name: String,
+        timeout_ms: Option<u32>,
+        interval_ms: Option<u32>,
+    ) -> Self {
+        Service {
+            id,
+            url,
+            name,
+            timeout_ms,
+            interval_ms,
+        }
     }
-    pub fn id(&self) -> &str { &self.id }
-    pub fn name(&self) -> &str { &self.name }
-    pub fn url(&self) -> &str { &self.url }
-    pub fn timeout_ms(&self) -> Option<u32> { self.timeout_ms }
-    pub fn interval_ms(&self) -> Option<u32> { self.interval_ms }
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+    pub fn url(&self) -> &str {
+        &self.url
+    }
+    pub fn timeout_ms(&self) -> Option<u32> {
+        self.timeout_ms
+    }
+    pub fn interval_ms(&self) -> Option<u32> {
+        self.interval_ms
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -29,12 +51,20 @@ pub struct RunResult {
 
 impl RunResult {
     pub fn new(id: String, failed_attempts: u8) -> Self {
-        Self { id, failed_attempts, last_check_ms: None }
+        Self {
+            id,
+            failed_attempts,
+            last_check_ms: None,
+        }
     }
-    
-    pub fn id(&self) -> &str { &self.id }
 
-    pub fn last_check_ms(&self) -> Option<u64> { self.last_check_ms }
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn last_check_ms(&self) -> Option<u64> {
+        self.last_check_ms
+    }
 
     pub fn record(&mut self, success: bool, now_ms: u64) {
         self.last_check_ms = Some(now_ms);
@@ -49,11 +79,13 @@ impl RunResult {
         match self.failed_attempts {
             0 => Status::Up,
             n if n >= down_threshold => Status::Down { attempts: n },
-            n => Status::Failing { attempts: n, threshold: down_threshold },
+            n => Status::Failing {
+                attempts: n,
+                threshold: down_threshold,
+            },
         }
     }
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Status {
@@ -66,7 +98,10 @@ impl std::fmt::Display for Status {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Status::Up => write!(f, "Up"),
-            Status::Failing { attempts, threshold } => write!(f, "Failing ({attempts}/{threshold})"),
+            Status::Failing {
+                attempts,
+                threshold,
+            } => write!(f, "Failing ({attempts}/{threshold})"),
             Status::Down { attempts } => write!(f, "Down ({attempts} failed checks)"),
         }
     }
@@ -80,9 +115,14 @@ pub struct OutputList {
 
 impl OutputList {
     pub fn new(last_run_ms: u64, outputs: Vec<RunResult>) -> Self {
-        OutputList { last_run_ms: Some(last_run_ms), outputs }
+        OutputList {
+            last_run_ms: Some(last_run_ms),
+            outputs,
+        }
     }
-    pub fn outputs(&self) -> &Vec<RunResult> { &self.outputs }
+    pub fn outputs(&self) -> &Vec<RunResult> {
+        &self.outputs
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -94,9 +134,15 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn timeout_ms(&self) -> u32 { self.timeout_ms }
-    pub fn interval_ms(&self) -> u32 { self.interval_ms }
-    pub fn down_threshold(&self) -> u8 { self.down_threshold }
+    pub fn timeout_ms(&self) -> u32 {
+        self.timeout_ms
+    }
+    pub fn interval_ms(&self) -> u32 {
+        self.interval_ms
+    }
+    pub fn down_threshold(&self) -> u8 {
+        self.down_threshold
+    }
 }
 
 impl Default for Config {
