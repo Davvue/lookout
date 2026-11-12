@@ -3,13 +3,16 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Service {
     id: String,
-    name: String,
     url: String,
+    name: String,
     timeout_ms: Option<u32>,
     interval_ms: Option<u32>,
 }
 
 impl Service {
+    pub fn new(id: String, url: String, name: String, timeout_ms: Option<u32>, interval_ms: Option<u32>) -> Self {
+        Service { id, url, name, timeout_ms, interval_ms }
+    }
     pub fn id(&self) -> &str { &self.id }
     pub fn name(&self) -> &str { &self.name }
     pub fn url(&self) -> &str { &self.url }

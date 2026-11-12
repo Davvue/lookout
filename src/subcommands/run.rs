@@ -85,10 +85,6 @@ pub fn execute(
     Ok(())
 }
 
-fn is_due(now_ms: u64, last_run_ms: u64, interval_ms: u32) -> bool {
-    remaining_ms(now_ms, last_run_ms, interval_ms) == 0
-}
-
 fn remaining_ms(now_ms: u64, last_check_ms: u64, interval_ms: u32) -> u64 {
     let elapsed = now_ms.saturating_sub(last_check_ms);
     u64::from(interval_ms).saturating_sub(elapsed)

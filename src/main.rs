@@ -25,7 +25,7 @@ fn main() -> ExitCode {
     };
 
     let execution_result = match args.command() {
-        Command::Add { .. } => execute_add(),
+        Command::Add { url, id, name, timeout_ms, interval_ms } => execute_add(&store, url.clone(), id.clone(), name.clone(), *timeout_ms, *interval_ms),
         Command::List => execute_list(&store),
         Command::Remove { .. } => execute_remove(),
         Command::Run { id, print, force } => execute_run(&store, id.as_deref(), *print, *force),

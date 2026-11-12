@@ -47,7 +47,7 @@ impl FileStore {
         Ok(serde_json::from_reader(io::BufReader::new(file))?)
     }
 
-    fn write_json<T: Serialize>(&self, name: &str, data: &T) -> Result<(), StoreError> {
+    fn write_json<T: Serialize + ?Sized>(&self, name: &str, data: &T) -> Result<(), StoreError> {
         let tmp = self.dir.join(format!("{name}.tmp"));
         
         let mut writer = io::BufWriter::new(fs::File::create(&tmp)?);
@@ -65,4 +65,6 @@ impl Store for FileStore {
     fn output(&self) -> Result<OutputList, StoreError> { self.read_json(OUTPUT_FILE) }
 
     fn save_output(&self, output: &OutputList) -> Result<(), StoreError> { self.write_json(OUTPUT_FILE, output) }
+
+    fn save_services(&self, services: &[Service]) -> Result<(), StoreError> { self.write_json(SERVICE_FILE, services) }
 }

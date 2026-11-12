@@ -8,6 +8,7 @@ pub trait Store {
     fn services(&self) -> Result<Vec<Service>, StoreError>;
     fn output(&self) -> Result<OutputList, StoreError>;
     fn save_output(&self, output: &OutputList) -> Result<(), StoreError>;
+    fn save_services(&self, services: &[Service]) -> Result<(), StoreError>;
 }
 
 #[derive(Debug)]
