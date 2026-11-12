@@ -41,16 +41,6 @@ pub fn execute(
         .collect();
 
     for service in candidate_services {
-        if !force
-            && !is_due(
-                now_ms,
-                previous_output.last_run_ms().unwrap_or(0),
-                service.interval_ms().unwrap_or(config.interval_ms()),
-            )
-        {
-            continue;
-        }
-
         let index = match run_results.iter().position(|r| r.id() == service.id()) {
             Some(index) => index,
             None => {
@@ -60,11 +50,24 @@ pub fn execute(
         };
         let result = &mut run_results[index];
 
+        let remaining = remaining_ms(
+            now_ms,
+            result.last_check_ms().unwrap_or(0),
+            service.interval_ms().unwrap_or(config.interval_ms())
+        );
+
+        if !force
+            && remaining > 0
+        {
+            if print { println!("{}: skipped (next check due in {})", service.name(), format_duration(remaining)); }
+            continue;
+        }
+
         let res = http_request(
             service.url(),
             service.timeout_ms().unwrap_or(config.timeout_ms()),
         );
-        result.record(matches!(res, Ok(true)));
+        result.record(matches!(res, Ok(true)), now_ms);
 
         if print {
             let status = result.status(config.down_threshold());
@@ -83,5 +86,17 @@ pub fn execute(
 }
 
 fn is_due(now_ms: u64, last_run_ms: u64, interval_ms: u32) -> bool {
-    now_ms.saturating_sub(last_run_ms) >= u64::from(interval_ms)
+    remaining_ms(now_ms, last_run_ms, interval_ms) == 0
+}
+
+fn remaining_ms(now_ms: u64, last_check_ms: u64, interval_ms: u32) -> u64 {
+    let elapsed = now_ms.saturating_sub(last_check_ms);
+    u64::from(interval_ms).saturating_sub(elapsed)
+}
+
+fn format_duration(remaining: u64) -> String {
+    let total_secs = remaining.div_ceil(1000);
+    let mins = total_secs / 60;
+    let secs = total_secs % 60;
+    format!("{}m {:2}s", mins, secs)
 }

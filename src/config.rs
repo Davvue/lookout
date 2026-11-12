@@ -20,18 +20,21 @@ impl Service {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RunResult {
     id: String,
+    last_check_ms: Option<u64>,
     failed_attempts: u8,
 }
 
 impl RunResult {
     pub fn new(id: String, failed_attempts: u8) -> Self {
-        Self { id, failed_attempts }
+        Self { id, failed_attempts, last_check_ms: None }
     }
     
     pub fn id(&self) -> &str { &self.id }
-    pub fn failed_attempts(&self) -> u8 { self.failed_attempts }
 
-    pub fn record(&mut self, success: bool) {
+    pub fn last_check_ms(&self) -> Option<u64> { self.last_check_ms }
+
+    pub fn record(&mut self, success: bool, now_ms: u64) {
+        self.last_check_ms = Some(now_ms);
         if success {
             self.failed_attempts = 0;
         } else {
@@ -74,9 +77,8 @@ pub struct OutputList {
 
 impl OutputList {
     pub fn new(last_run_ms: u64, outputs: Vec<RunResult>) -> Self {
-        OutputList { last_run_ms: Some(last_run_ms), outputs: outputs }
+        OutputList { last_run_ms: Some(last_run_ms), outputs }
     }
-    pub fn last_run_ms(&self) -> Option<u64> { self.last_run_ms }
     pub fn outputs(&self) -> &Vec<RunResult> { &self.outputs }
 }
 
