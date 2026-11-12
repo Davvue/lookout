@@ -8,8 +8,10 @@ pub fn execute(store: &dyn Store, id: &str) -> Result<(), String> {
     let before = services.len();
     services.retain(|s| s.id() != id);
 
-    if services.len() != before {
+    if services.len() == before {
         return Err(format!("Service with id '{}' doesn't exist", id));
+    } else {
+        println!("Service with id '{}' removed", id);
     }
 
     store

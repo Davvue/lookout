@@ -17,9 +17,10 @@ pub fn execute(
         return Err(format!("Service with id '{}' already exists", id));
     }
 
-    let new_service = Service::new(id.clone(), url, name.unwrap_or(id), timeout_ms, interval_ms);
+    let new_service = Service::new(id.clone(), url, name.unwrap_or(id.clone()), timeout_ms, interval_ms);
 
     existing_services.push(new_service);
+    println!("Service with id '{}' added", id);
 
     store
         .save_services(&existing_services)
